@@ -50,7 +50,7 @@
   #define SERIAL_USER_BUTTON    1
 //  #define REVERSE_LED           1
 
-//  #define CAM_SYMA_PIN          12
+  #define CAM_SYMA_PIN          12
 #if defined(CAM_SYMA_PIN)
   #define CAM_SYMA_PIN_PINMODE_OUT pinMode(CAM_SYMA_PIN,OUTPUT);
   #define CAM_SYMA_PIN_HIGH     PORTB |= 1<<4;

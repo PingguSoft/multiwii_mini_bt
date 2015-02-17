@@ -266,6 +266,14 @@ void evaluateCommand(uint8_t c) {
     //case MSP_PRIVATE:
     //  headSerialError();tailSerialReply(); // we don't have any custom msp currently, so tell the gui we do not use that
     //  break;
+
+#if SERIAL_USER_BUTTON
+    case MSP_SET_USER_BUTTON:
+        byteUserButton = read8();
+        headSerialReply(0);
+        break;
+#endif
+
     case MSP_SET_RAW_RC:
       s_struct_w((uint8_t*)&rcSerial,16);
       rcSerialCount = 50; // 1s transition 
