@@ -5,7 +5,12 @@
 /***************             test configurations                   ********************/
 /**************************************************************************************/
 #if defined(INTERBOARD_PICO_MULTIWII)
-  #define QUADX
+//  #define QUADX
+  #define HEX6X
+
+  #if defined(HEX6X)
+      #define A0_A1_PIN_HEX
+  #endif
   #define I2C_SPEED 400000L
   #define MPU6050       //combo + ACC
 //  #define MPU6050_LPF_42HZ
@@ -15,7 +20,7 @@
   #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
   #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  X; imu.gyroADC[PITCH] =  Y; imu.gyroADC[YAW] = -Z;}
   #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -X; imu.magADC[PITCH]  = -Y; imu.magADC[YAW]  = -Z;}
-  #define BUZZER
+//  #define BUZZER
 
     /* for V BAT monitoring
        after the resistor divisor we should get [0V;5V]->[0;1023] on analog V_BATPIN
@@ -31,8 +36,7 @@
   #define VBATLEVEL_CRIT    84 //  (*) 8.4V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
   #define NO_VBAT           10  // (*) Avoid beeping without any battery
 
-//  #define EXT_MOTOR_RANGE
-  #define EXT_MOTOR_1KHZ
+  #define EXT_MOTOR_RANGE
   #define MOTOR_STOP
 //  #define DEADBAND 24
 
@@ -49,8 +53,8 @@
   #define SERIAL_RECEIVER_ONLY  1
   #define SERIAL_USER_BUTTON    1
 //  #define REVERSE_LED           1
+//  #define CAM_SYMA_PIN          12
 
-  #define CAM_SYMA_PIN          12
 #if defined(CAM_SYMA_PIN)
   #define CAM_SYMA_PIN_PINMODE_OUT pinMode(CAM_SYMA_PIN,OUTPUT);
   #define CAM_SYMA_PIN_HIGH     PORTB |= 1<<4;
