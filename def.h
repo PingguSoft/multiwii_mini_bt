@@ -9,8 +9,9 @@
   #define HEX6X
 
   #if defined(HEX6X)
-      #define A0_A1_PIN_HEX
+      //#define A0_A1_PIN_HEX
   #endif
+
   #define I2C_SPEED 400000L
   #define MPU6050       //combo + ACC
 //  #define MPU6050_LPF_42HZ
