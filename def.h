@@ -30,12 +30,13 @@
        must be associated with #define BUZZER ! */
   #define VOLTAGEDROP_COMPENSATION
   #define VBAT
-  #define VBATSCALE         9  // (*) change this value if readed Battery voltage is different than real voltage
+  #define VBATSCALE         10  // (*) change this value if readed Battery voltage is different than real voltage
   #define VBATNOMINAL       126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
   #define VBATLEVEL_WARN1   105 // (*) 10,5V
   #define VBATLEVEL_WARN2   100 // (*) 10.0V
-  #define VBATLEVEL_CRIT    84 //  (*) 8.4V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
+  #define VBATLEVEL_CRIT    84  // (*) 8.4V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
   #define NO_VBAT           10  // (*) Avoid beeping without any battery
+  #define VBAT_OFFSET       3   // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
   #define EXT_MOTOR_RANGE
   #define MOTOR_STOP
