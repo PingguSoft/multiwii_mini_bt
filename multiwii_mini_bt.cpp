@@ -1,7 +1,7 @@
 /*
 MultiWiiCopter by Alexandre Dubus
 www.multiwii.com
-November  2013     V2.3
+March  2015     V2.4
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -439,7 +439,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
   tmp = (uint32_t)(tmp-MINCHECK)*2559/(2000-MINCHECK); // [MINCHECK;2000] -> [0;2559]
   tmp2 = tmp/256; // range [0;9]
   rcCommand[THROTTLE] = lookupThrottleRC[tmp2] + (tmp-tmp2*256) * (lookupThrottleRC[tmp2+1]-lookupThrottleRC[tmp2]) / 256; // [0;2559] -> expo -> [conf.minthrottle;MAXTHROTTLE]
-//#if defined(HEADFREE)
+  #if defined(HEADFREE)
     if(f.HEADFREE_MODE) { //to optimize
       float radDiff = (att.heading - headFreeModeHold) * 0.0174533f; // where PI/180 ~= 0.0174533
       float cosDiff = cos(radDiff);
@@ -448,7 +448,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
       rcCommand[ROLL] =  rcCommand[ROLL]*cosDiff - rcCommand[PITCH]*sinDiff;
       rcCommand[PITCH] = rcCommand_PITCH;
     }
-//#endif
+  #endif
 
   // query at most one multiplexed analog channel per MWii cycle
   static uint8_t analogReader =0;
@@ -484,18 +484,18 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
       static uint16_t vvec[VBAT_SMOOTH], vsum;
       uint16_t v = analogRead(V_BATPIN);
       #if VBAT_SMOOTH == 1
-        analog.vbat = (v<<4) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+        analog.vbat = (v*VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
       #else
         vsum += v;
         vsum -= vvec[ind];
         vvec[ind++] = v;
         ind %= VBAT_SMOOTH;
-        #if VBAT_SMOOTH == 16
+        #if VBAT_SMOOTH == VBAT_PRESCALER
           analog.vbat = vsum / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
-        #elif VBAT_SMOOTH < 16
-          analog.vbat = (vsum * (16/VBAT_SMOOTH)) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+        #elif VBAT_SMOOTH < VBAT_PRESCALER
+          analog.vbat = (vsum * (VBAT_PRESCALER/VBAT_SMOOTH)) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
         #else
-          analog.vbat = ((vsum /VBAT_SMOOTH) * 16) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
+          analog.vbat = ((vsum /VBAT_SMOOTH) * VBAT_PRESCALER) / conf.vbatscale + VBAT_OFFSET; // result is Vbatt in 0.1V steps
         #endif
       #endif
     #endif // VBAT
@@ -744,7 +744,7 @@ void setup() {
     GPS_conf.max_wp_number = getMaxWPNumber();
   #endif
 
-  #if defined(LCD_ETPP) || defined(LCD_LCD03) || defined(OLED_I2C_128x64) || defined(OLED_DIGOLE) || defined(LCD_TELEMETRY_STEP)
+  #if defined(LCD_ETPP) || defined(LCD_LCD03) || defined(LCD_LCD03S) || defined(OLED_I2C_128x64) || defined(OLED_DIGOLE) || defined(LCD_TELEMETRY_STEP)
     initLCD();
   #endif
   #ifdef LCD_TELEMETRY_DEBUG
@@ -795,9 +795,9 @@ void go_arm() {
     ) {
     if(!f.ARMED && !f.BARO_MODE) { // arm now!
       f.ARMED = 1;
-//  #if defined(HEADFREE)
+      #if defined(HEADFREE)
         headFreeModeHold = att.heading;
-//  #endif
+      #endif
       magHold = att.heading;
       #if defined(VBAT)
         if (analog.vbat > NO_VBAT) vbatMin = analog.vbat;
@@ -1055,12 +1055,13 @@ void loop () {
     #if defined(EXTENDED_AUX_STATES)
     uint32_t auxState = 0;
     for(i=0;i<4;i++)
-      auxState |= (rcData[AUX1+i]<1230)<<(6*i) |
-      (1231<rcData[AUX1+i] && rcData[AUX1+i]<1360)<<(6*i+1) |
-      (1361<rcData[AUX1+i] && rcData[AUX1+i]<1490)<<(6*i+2) |
-      (1491<rcData[AUX1+i] && rcData[AUX1+i]<1620)<<(6*i+3) |
-      (1621<rcData[AUX1+i] && rcData[AUX1+i]<1749)<<(6*i+4) |
-      (rcData[AUX1+i]>1750)<<(6*i+5);
+      auxState |=
+      (uint32_t)(rcData[AUX1+i]<1230)<<(6*i) |
+      (uint32_t)(1231<rcData[AUX1+i] && rcData[AUX1+i]<1360)<<(6*i+1) |
+      (uint32_t)(1361<rcData[AUX1+i] && rcData[AUX1+i]<1490)<<(6*i+2) |
+      (uint32_t)(1491<rcData[AUX1+i] && rcData[AUX1+i]<1620)<<(6*i+3) |
+      (uint32_t)(1621<rcData[AUX1+i] && rcData[AUX1+i]<1749)<<(6*i+4) |
+      (uint32_t)(rcData[AUX1+i]>1750)<<(6*i+5);
     #else
     uint16_t auxState = 0;
     for(i=0;i<4;i++)
@@ -1169,7 +1170,7 @@ void loop () {
       } else {
         f.MAG_MODE = 0;
       }
-    #endif
+  #endif
 
     #if GPS
     // This handles the three rcOptions boxes
@@ -1191,6 +1192,7 @@ void loop () {
               if (f.GPS_mode == GPS_MODE_NAV)
                 NAV_paused_at = mission_step.number;
               f.GPS_mode = GPS_MODE_HOLD;
+              f.GPS_BARO_MODE = false;
               GPS_set_next_wp(&GPS_coord[LAT], &GPS_coord[LON],&GPS_coord[LAT], & GPS_coord[LON]); //hold at the current position
               set_new_altitude(alt.EstAlt);                                //and current altitude
               NAV_state = NAV_STATE_HOLD_INFINIT;

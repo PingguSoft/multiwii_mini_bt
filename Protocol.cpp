@@ -12,7 +12,7 @@
 #include "RX.h"
 
 /************************************** MultiWii Serial Protocol *******************************************************/
-// Multiwii Serial Protocol 0 
+// Multiwii Serial Protocol 0
 #define MSP_VERSION              0
 
 #if SERIAL_USER_BUTTON
@@ -38,7 +38,7 @@
 #define MSP_PID                  112   //out message         P I D coeff (9 are used currently)
 #define MSP_BOX                  113   //out message         BOX setup (number is dependant of your setup)
 #define MSP_MISC                 114   //out message         powermeter trig
-#define MSP_MOTOR_PINS           115   //out message         which pins are in use for motors & servos, for GUI 
+#define MSP_MOTOR_PINS           115   //out message         which pins are in use for motors & servos, for GUI
 #define MSP_BOXNAMES             116   //out message         the aux switch names
 #define MSP_PIDNAMES             117   //out message         the PID names
 #define MSP_WP                   118   //out message         get a WP, WP# is in the payload, returns (WP#, lat, lon, alt, flags) WP#0-home, WP#16-poshold
@@ -64,7 +64,7 @@
 #define MSP_SET_HEAD             211   //in message          define a new heading hold direction
 #define MSP_SET_SERVO_CONF       212   //in message          Servo settings
 #define MSP_SET_MOTOR            214   //in message          PropBalance function
-#define MSP_SET_NAV_CONFIG       215   //in message          Sets nav config parameters - write to the eeprom  
+#define MSP_SET_NAV_CONFIG       215   //in message          Sets nav config parameters - write to the eeprom
 
 #define MSP_SET_ACC_TRIM         239   //in message          set acc angle trim values
 #define MSP_ACC_TRIM             240   //out message         get acc angle trim values
@@ -152,18 +152,22 @@ static void serializeNames(PGM_P s) {
   tailSerialReply();
 }
 
+static void __attribute__ ((noinline)) s_struct_w(uint8_t *cb,uint8_t siz) {
+  while(siz--) *cb++ = read8();
+}
+
+static void s_struct_partial(uint8_t *cb,uint8_t siz) {
+  while(siz--) serialize8(*cb++);
+}
+
 static void s_struct(uint8_t *cb,uint8_t siz) {
   headSerialReply(siz);
-  while(siz--) serialize8(*cb++);
+  s_struct_partial(cb,siz);
   tailSerialReply();
 }
 
 static void mspAck() {
   headSerialReply(0);tailSerialReply();
-}
-
-static void __attribute__ ((noinline)) s_struct_w(uint8_t *cb,uint8_t siz) {
-  while(siz--) *cb++ = read8();
 }
 
 enum MSP_protocol_bytes {
@@ -243,7 +247,7 @@ void serialCom() {
             GPS_last_frame_seen = timeMax;
             GPS_Frame = 1;
           }
-  
+
           // Check for stalled GPS, if no frames seen for 1.2sec then consider it LOST
           if ((timeMax - GPS_last_frame_seen) > 1200000) {
             //No update since 1200ms clear fix...
@@ -259,7 +263,7 @@ void serialCom() {
 }
 
 void evaluateCommand(uint8_t c) {
-  uint32_t tmp=0; 
+  uint32_t tmp=0;
 
   switch(c) {
     // adding this message as a comment will return an error status for MSP_PRIVATE (end of switch), allowing third party tools to distinguish the implementation of this message
@@ -276,7 +280,7 @@ void evaluateCommand(uint8_t c) {
 
     case MSP_SET_RAW_RC:
       s_struct_w((uint8_t*)&rcSerial,16);
-      rcSerialCount = 50; // 1s transition 
+      rcSerialCount = 50; // 1s transition
       break;
     case MSP_SET_PID:
       mspAck();
@@ -308,9 +312,9 @@ void evaluateCommand(uint8_t c) {
         conf.powerTrigger1 = set_misc.a / PLEVELSCALE;
       #endif
       conf.minthrottle = set_misc.b;
-      #ifdef FAILSAFE 
+      #ifdef FAILSAFE
         conf.failsafe_throttle = set_misc.e;
-      #endif  
+      #endif
       #if MAG
         conf.mag_declination = set_misc.h;
       #endif
@@ -332,9 +336,9 @@ void evaluateCommand(uint8_t c) {
       misc.b = conf.minthrottle;
       misc.c = MAXTHROTTLE;
       misc.d = MINCOMMAND;
-      #ifdef FAILSAFE 
+      #ifdef FAILSAFE
         misc.e = conf.failsafe_throttle;
-      #else  
+      #else
         misc.e = 0;
       #endif
       #ifdef LOG_PERMANENT
@@ -388,7 +392,7 @@ void evaluateCommand(uint8_t c) {
       id.v     = VERSION;
       id.t     = MULTITYPE;
       id.msp_v = MSP_VERSION;
-      id.cap   = (0+BIND_CAPABLE)|DYNBAL<<2|FLAP<<3|NAVCAP<<4|EXTAUX<<5|((uint32_t)NAVI_VERSION<<28); //Navi version is stored in the upper four bits; 
+      id.cap   = (0+BIND_CAPABLE)|DYNBAL<<2|FLAP<<3|NAVCAP<<4|EXTAUX<<5|((uint32_t)NAVI_VERSION<<28); //Navi version is stored in the upper four bits;
       s_struct((uint8_t*)&id,7);
       break;
     case MSP_STATUS:
@@ -404,7 +408,7 @@ void evaluateCommand(uint8_t c) {
         if(f.ANGLE_MODE)   tmp |= 1<<BOXANGLE;
         if(f.HORIZON_MODE) tmp |= 1<<BOXHORIZON;
       #endif
-     #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
+      #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
         if(f.BARO_MODE) tmp |= 1<<BOXBARO;
       #endif
      #if MAG
@@ -426,7 +430,7 @@ void evaluateCommand(uint8_t c) {
       #endif
       #if GPS
         switch (f.GPS_mode) {
-          case GPS_MODE_HOLD: 
+          case GPS_MODE_HOLD:
             tmp |= 1<<BOXGPSHOLD;
             break;
           case GPS_MODE_RTH:
@@ -474,7 +478,7 @@ void evaluateCommand(uint8_t c) {
     case MSP_RAW_IMU:
       #if defined(DYNBALANCE)
         for(uint8_t axis=0;axis<3;axis++) {imu.gyroData[axis]=imu.gyroADC[axis];imu.accSmooth[axis]= imu.accADC[axis];} // Send the unfiltered Gyro & Acc values to gui.
-      #endif 
+      #endif
       s_struct((uint8_t*)&imu,18);
       break;
     case MSP_SERVO:
@@ -491,11 +495,15 @@ void evaluateCommand(uint8_t c) {
       s_struct((uint8_t*)&motor,16);
       break;
     case MSP_ACC_TRIM:
-      s_struct((uint8_t*)&conf.angleTrim[0],4);
+      headSerialReply(4);
+      s_struct_partial((uint8_t*)&conf.angleTrim[PITCH],2);
+      s_struct_partial((uint8_t*)&conf.angleTrim[ROLL],2);
+      tailSerialReply();
       break;
     case MSP_SET_ACC_TRIM:
       mspAck();
-      s_struct_w((uint8_t*)&conf.angleTrim[0],4);
+      s_struct_w((uint8_t*)&conf.angleTrim[PITCH],2);
+      s_struct_w((uint8_t*)&conf.angleTrim[ROLL],2);
       break;
     case MSP_RC:
       s_struct((uint8_t*)&rcData,RC_CHANS*2);
@@ -570,7 +578,7 @@ void evaluateCommand(uint8_t c) {
       uint8_t flag;
       bool    success;
 
-      wp_no = read8(); //get the wp number  
+      wp_no = read8(); //get the wp number
       headSerialReply(21);
       if (wp_no == 0) { //Get HOME coordinates
         serialize8(wp_no);
@@ -617,7 +625,7 @@ void evaluateCommand(uint8_t c) {
 
       if (NAV_state == NAV_STATE_HOLD_INFINIT && wp_no == 255) { //Special case - during stable poshold we allow change the hold position
         mission_step.number = wp_no;
-        mission_step.action = MISSION_HOLD_UNLIM; 
+        mission_step.action = MISSION_HOLD_UNLIM;
         uint8_t temp = read8();
         mission_step.pos[LAT] =  read32();
         mission_step.pos[LON] =  read32();
@@ -644,7 +652,7 @@ void evaluateCommand(uint8_t c) {
         mission_step.flag       =  read8();
         //It's not sure, that we want to do poshold change via mission planner so perhaps the next if is deletable
         /*
-        if (mission_step.number == 255) //Set up new hold position via mission planner, It must set the action to MISSION_HOLD_INFINIT 
+        if (mission_step.number == 255) //Set up new hold position via mission planner, It must set the action to MISSION_HOLD_INFINIT
         {
         if (mission_step.altitude !=0) set_new_altitude(mission_step.altitude); //Set the altitude
         GPS_set_next_wp(&mission_step.pos[LAT], &mission_step.pos[LON], &GPS_coord[LAT], &GPS_coord[LON]);
@@ -749,10 +757,12 @@ void evaluateCommand(uint8_t c) {
 void evaluateOtherData(uint8_t sr) {
   #ifndef SUPPRESS_OTHER_SERIAL_COMMANDS
     #if GPS
-      // on the GPS port, we must avoid interpreting incoming values for other commands because there is no
-      // protocol protection as is with MSP commands
-      // doing so with single chars would be prone to error.
-      if (CURRENTPORT == GPS_SERIAL) return;
+      #if !defined(I2C_GPS)
+        // on the GPS port, we must avoid interpreting incoming values for other commands because there is no
+        // protocol protection as is with MSP commands
+        // doing so with single chars would be prone to error.
+        if (CURRENTPORT == GPS_SERIAL) return;
+      #endif
     #endif
     switch (sr) {
     // Note: we may receive weird characters here which could trigger unwanted features during flight.

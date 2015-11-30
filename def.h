@@ -5,18 +5,13 @@
 /***************             test configurations                   ********************/
 /**************************************************************************************/
 #if defined(INTERBOARD_PICO_MULTIWII)
-//  #define QUADX
-  #define HEX6X
-
-  #if defined(HEX6X)
-      //#define A0_A1_PIN_HEX
-  #endif
+  #define QUADX
+//  #define HEX6X
 
   #define I2C_SPEED 400000L
   #define MPU6050       //combo + ACC
-//  #define MPU6050_LPF_42HZ
-//  #define HMC5883     // magnetor
-//  #define HEADFREE
+  #define HMC5883     // magnetor
+  #define HEADFREE
 //  #define BMP085      // barometer
   #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
   #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  X; imu.gyroADC[PITCH] =  Y; imu.gyroADC[YAW] = -Z;}

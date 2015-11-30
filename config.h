@@ -288,8 +288,8 @@
     //#define GOVERNOR_D 4     // (*) decay timing. Higher value -> takes longer to return throttle to normal. Must be >=1;
 
     /* tail precomp from collective */
-    //#define YAW_COLL_PRECOMP 15           // (*) proportional factor in 0.1. Higher value -> higher precomp effect. value of 10 equals no/neutral effect
-    //#define YAW_COLL_PRECOMP_DEADBAND 120 // (*) deadband for collective pitch input signal around 0-pitch input value
+    #define YAW_COLL_PRECOMP 10           // (*) proportional factor in 0.1. Higher value -> higher precomp effect. value of 10 equals no/neutral effect
+    #define YAW_COLL_PRECOMP_DEADBAND 120 // (*) deadband for collective pitch input signal around 0-pitch input value
 
     //#define VOLTAGEDROP_COMPENSATION // voltage impact correction
 
@@ -781,13 +781,14 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 
     /*****************************   The type of LCD     **********************************/
       /* choice of LCD attached for configuration and telemetry, see notes below */
-      //#define LCD_DUMMY       // No Physical LCD attached.  With this & LCD_CONF defined, TX sticks still work to set gains, by watching LED blink.
+      //#define LCD_DUMMY       // No Physical LCD attached.  With this & LCD_CONF defined, TX sticks still work to set gains, by watching LED blink.  
       //#define LCD_SERIAL3W    // Alex' initial variant with 3 wires, using rx-pin for transmission @9600 baud fixed
       //#define LCD_TEXTSTAR    // SERIAL LCD: Cat's Whisker LCD_TEXTSTAR Module CW-LCD-02 (Which has 4 input keys for selecting menus)
       //#define LCD_VT100       // SERIAL LCD: vt100 compatible terminal emulation (blueterm, putty, etc.)
       //#define LCD_TTY         // SERIAL LCD: useful to tweak parameters over cable with arduino IDE 'serial monitor'
       //#define LCD_ETPP        // I2C LCD: Eagle Tree Power Panel LCD, which is i2c (not serial)
       //#define LCD_LCD03       // I2C LCD: LCD03, which is i2c
+      //#define LCD_LCD03S      // SERIAL LCD: LCD03 whit serial 9600 baud comunication enabled.
       //#define OLED_I2C_128x64 // I2C LCD: OLED http://www.multiwii.com/forum/viewtopic.php?f=7&t=1350
       //#define OLED_DIGOLE     // I2C OLED from http://www.digole.com/index.php?productID=550
 
@@ -990,6 +991,8 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 /****************  SECTION  7 - TUNING & DEVELOPER                                  **************/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
+
+  #define VBAT_PRESCALER 16 // set this to 8 if vbatscale would exceed 255
 
   /**************************************************************************************/
   /********   special ESC with extended range [0-2000] microseconds  ********************/
