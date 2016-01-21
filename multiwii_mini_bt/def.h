@@ -10,7 +10,7 @@
 
   #define I2C_SPEED 400000L
   #define MPU6050       //combo + ACC
-  #define HMC5883     // magnetor
+//  #define HMC5883     // magnetor
   #define HEADFREE
 //  #define BMP085      // barometer
   #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
@@ -57,43 +57,16 @@
   #define CAM_SYMA_PIN_HIGH     PORTB |= 1<<4;
   #define CAM_SYMA_PIN_LOW      PORTB &= ~(1<<4);
 #endif
-  // SONAR
-  /* Generic sonar: hc-sr04, srf04, dyp-me007, all generic sonar with echo/pulse pin
-     default pulse is PH6/12, echo is PB4/11
-  */
-//  #define SONAR_GENERIC_ECHOPULSE
 
+#if 1
+// HC-SR04
+#define SONAR_GENERIC_ECHOPULSE   1
+#define SONAR_GENERIC_TRIGGER_PIN 12
+#define SONAR_GENERIC_ECHO_PIN    A2
 
-#if defined(SONAR_GENERIC_ECHOPULSE)
-  #define SONAR_GENERIC_SCALE       58 //scale for ranging conversion (hcsr04 is 58)
-  #define SONAR_GENERIC_MAX_RANGE   400 //cm (could be more)
-
-  /************************* Sonar alt hold / precision / ground collision keeper *******/
-  //#define SONAR_TILT_CORRECTION //correct ranging from quad inclinaison, may works or not, depends of beam shape, ultrasonic absorption, sensibility of environnement, etc...
-  //will not be applyed if hypo is longer than max range of course and no more than 30/40¡Æ correction
-
-  #define SONAR_MAX_HOLD 380 //cm, kind of error delimiter, for now to avoid rocket climbing, only usefull if no baro
-
-  //if using baro + sonar
-  #define SONAR_BARO_FUSION_LC 250 //cm, baro/sonar readings fusion, low cut, below = full sonar
-  #define SONAR_BARO_FUSION_HC 300 //cm, baro/sonar readings fusion, high cut, above = full baro
-  #define SONAR_BARO_FUSION_RATIO 0.0 //0.0-1.0,  baro/sonar readings fusion, amount of each sensor value, 0 = proportionnel between LC and HC
-  #define SONAR_BARO_LPF_LC 0.6f
-  #define SONAR_BARO_LPF_HC 0.9f
-
-  #define SONAR_GEP_TriggerPin             12
-  #define SONAR_GEP_TriggerPin_PINMODE_OUT pinMode(SONAR_GEP_TriggerPin,OUTPUT);
-  #define SONAR_GEP_TriggerPin_PIN_HIGH    PORTB |= 1<<4;
-  #define SONAR_GEP_TriggerPin_PIN_LOW     PORTB &= ~(1<<4);
-
-  #define SONAR_GEP_EchoPin                A2
-  #define SONAR_GEP_EchoPin_PINMODE_IN     pinMode(SONAR_GEP_EchoPin,INPUT);
-  #define SONAR_GEP_EchoPin_PCINT          PCINT10
-  #define SONAR_GEP_EchoPin_PCICR          PCICR |= (1<<PCIE1); // PCINT 8-13 belong to PCIE1
-  #define SONAR_GEP_EchoPin_PCMSK          PCMSK1 = (1<<SONAR_GEP_EchoPin_PCINT); // Mask Pin PCINT5 - all other PIns PCINT0-7 are not allowed to create interrupts!
-  #define SONAR_GEP_EchoPin_PCINT_vect     PCINT1_vect  // PCINT8-13 belog PCINT1_vect
-  #define SONAR_GEP_EchoPin_PIN            PINC  // PCINT8-13 belong to PINC
+#define OPTFLOW 3080
 #endif
+
 #endif
 
 #if COPTERTEST == 1
@@ -1783,7 +1756,7 @@
   #define NAVCAP 0
 #endif
 
-#if defined(SRF02) || defined(SRF08) || defined(SRF10) || defined(SRC235) || defined(I2C_GPS_SONAR)
+#if defined(SRF02) || defined(SRF08) || defined(SRF10) || defined(SRC235) || defined(I2C_GPS_SONAR) || defined(SONAR_GENERIC_ECHOPULSE)
   #define SONAR 1
 #else
   #define SONAR 0
@@ -2103,6 +2076,92 @@
     defined( ITG3200_LPF_256HZ) || defined( ITG3200_LPF_188HZ) || defined( ITG3200_LPF_98HZ) || defined( ITG3200_LPF_42HZ) || \
     defined( ITG3200_LPF_20HZ)  || defined( ITG3200_LPF_10HZ)
   #error "you use one feature that is no longer supported or has undergone a name change"
+#endif
+
+#if defined(SONAR_GENERIC_ECHOPULSE)
+
+// SONAR!! http://www.multiwii.com/forum/viewtopic.php?f=7&t=1033&start=170#p36603
+/* Generic sonar: hc-sr04, srf04, dyp-me007, all generic sonar with echo/pulse pin
+default pulse is PH6/12, echo is PB4/11
+*/
+
+  #define SONAR_GENERIC_SCALE           58      // scale for ranging conversion (hcsr04 is 58)
+  #define SONAR_GENERIC_MAX_RANGE       500     // cm (could be more)
+  #ifndef SONAR_GENERIC_TRIGGER_PIN
+    #define SONAR_GENERIC_TRIGGER_PIN   12      // default trigger pin
+  #endif
+  #ifndef SONAR_GENERIC_ECHO_PIN
+    #define SONAR_GENERIC_ECHO_PIN      11      // default echo pin
+  #endif
+
+/************************* Sonar alt hold / precision / ground collision keeper *******/
+  #define SONAR_MAX_HOLD                400     // cm, kind of error delimiter, for now to avoid rocket climbing, only usefull if no baro
+
+//if using baro + sonar       
+  #define SONAR_BARO_FUSION_LC          100     // cm, baro/sonar readings fusion, low cut, below = full sonar
+  #define SONAR_BARO_FUSION_HC          SONAR_MAX_HOLD // cm, baro/sonar readings fusion, high cut, above = full baro
+  #define SONAR_BARO_FUSION_RATIO       0.0     // 0.0-1.0,  baro/sonar readings fusion, amount of each sensor value, 0 = proportionnel between LC and HC
+  #define SONAR_BARO_LPF_LC             0.9f 
+  #define SONAR_BARO_LPF_HC             0.9f
+
+  #define SONAR_GEP_TriggerPin             SONAR_GENERIC_TRIGGER_PIN
+  #define SONAR_GEP_TriggerPin_PINMODE_OUT pinMode(SONAR_GEP_TriggerPin,OUTPUT);
+  #define SONAR_GEP_TriggerPin_PIN_HIGH    PORTB |= 1<<6;
+  #define SONAR_GEP_TriggerPin_PIN_LOW     PORTB &= ~(1<<6);
+  #define SONAR_GEP_EchoPin                SONAR_GENERIC_ECHO_PIN
+  #define SONAR_GEP_EchoPin_PINMODE_IN     pinMode(SONAR_GEP_EchoPin,INPUT);
+  #define SONAR_GEP_EchoPin_PCINT          PCINT5
+  #define SONAR_GEP_EchoPin_PCICR          PCICR |= (1<<PCIE0); // PCINT 0-7 belong to PCIE0
+  #define SONAR_GEP_EchoPin_PCMSK          PCMSK0 = (1<<SONAR_GEP_EchoPin_PCINT); // Mask Pin PCINT5 - all other PIns PCINT0-7 are not allowed to create interrupts!
+  #define SONAR_GEP_EchoPin_PCINT_vect     PCINT0_vect  // PCINT0-7 belog PCINT0_vect
+  #define SONAR_GEP_EchoPin_PIN            PINB  // PCINT0-7 belong to PINB
+#endif
+
+
+#if defined(OPTFLOW)
+/***** alexmos: Optical Flow sensor for position hold ********/
+/* Activated by 'GPSHOLD' checkbox (LEVEL mode must be enabled)
+	VEL(P, I) in GUI are used to PID tuning.
+
+Sensors currently supported: 
+	ADNS-5050
+		connect and define pins: OF_SCLK, OF_SDIO, OF_NCS
+
+	ADNS-3080 (not tested yet)
+		connect and define pins: OF_SCLK, OF_MISO, OF_MOSI, OF_NCS, OF_RESET (optional)
+
+	...	(if you implement other sensor, let me know)
+
+Due to software SPI,  you can use any of free Arduino pins
+*/
+
+/*
+#define OPTFLOW 5050
+#define OF_SCLK PITCHPIN
+#define OF_SDIO YAWPIN
+#define OF_NCS  ROLLPIN
+*/
+
+#define OF_SCLK 5
+#define OF_MISO 6
+#define OF_MOSI 7
+#define OF_NCS  8
+//#define OF_RESET ??
+
+#define OPTFLOW_I_GAIN 10 // Dont know if this right ? in Gui the Value is 0.010 , but with #define OPTFLOW_I_GAIN 0.100 i get a error :( 
+#define OPTFLOW_P_GAIN 50 // Dont know if this right ? in Gui the Value is 50
+
+/* Lense focal distance, mm (set it for your own lense) 
+ (How to check: debug4 in GUI should not react on ROLL tilt, but react on ROLL slide) */
+#define OF_FOCAL_DIST 9
+/* Deadband for ROLL,PITCH sticks where position hold is enabled. Max value 100 */
+#define OF_DEADBAND 15
+/* Rotate I-term with heading rotation. It will well compensate wind */
+#define OF_ROTATE_I
+/* Low-pass filter factor to prevent shaking. Possible values 1..8.  Default is 5. */
+#define OF_LPF_FACTOR 5
+/* Debug to GUI */
+//#define OF_DEBUG
 #endif
 
 #endif /* DEF_H_ */

@@ -25,6 +25,7 @@ March  2015     V2.4
 #include "Serial.h"
 #include "GPS.h"
 #include "Protocol.h"
+#include "OpticalFlow.h"
 
 #include <avr/pgmspace.h>
 
@@ -49,7 +50,7 @@ const char boxnames[] PROGMEM = // names for dynamic generation of config GUI
     "ANGLE;"
     "HORIZON;"
   #endif
-  #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
+#if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
     "BARO;"
   #endif
   #ifdef VARIOMETER
@@ -104,6 +105,12 @@ const char boxnames[] PROGMEM = // names for dynamic generation of config GUI
   "SYMA SHOT;"
   "SYMA CAM;"
 #endif
+#if SONAR
+"SONAR;"
+#endif 
+#if OPTFLOW
+"OPTFLOW;"
+#endif 
   ;
 
 const uint8_t boxids[] PROGMEM = {// permanent IDs associated to boxes. This way, you can rely on an ID number to identify a BOX function.
@@ -112,7 +119,7 @@ const uint8_t boxids[] PROGMEM = {// permanent IDs associated to boxes. This way
     1, //"ANGLE;"
     2, //"HORIZON;"
   #endif
-  #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
+  #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
     3, //"BARO;"
   #endif
   #ifdef VARIOMETER
@@ -164,8 +171,14 @@ const uint8_t boxids[] PROGMEM = {// permanent IDs associated to boxes. This way
   21, //"LAND;"
 #endif
 #ifdef CAM_SYMA_PIN
-  22, // "SYMA SHOT;"
-  23, // "SYMA CAM;"
+  22, //"SYMA SHOT;"
+  23, //"SYMA CAM;"
+#endif
+#if SONAR
+  24, //"SONAR;"
+#endif
+#if OPTFLOW
+  25, //"OPTFLOW;"
 #endif
   };
 
@@ -176,6 +189,9 @@ uint16_t cycleTime = 0;     // this is the number in micro second to achieve a f
 uint16_t calibratingA = 0;  // the calibration is done in the main loop. Calibrating decreases at each cycle down to 0, then we enter in a normal mode.
 uint16_t calibratingB = 0;  // baro calibration = get new ground pressure value
 uint16_t calibratingG;
+#if SONAR
+uint16_t calibratingS = 0;
+#endif
 int16_t  magHold,headFreeModeHold; // [-180;+180]
 uint8_t  vbatMin = VBATNOMINAL;  // lowest battery voltage in 0.1V steps
 uint8_t  rcOptions[CHECKBOXITEMS];
@@ -397,6 +413,7 @@ typedef struct {
   syma_flag_t syma_f;
   uint32_t    cam_syma_time = 0;
 #endif
+
 void annexCode() { // this code is excetuted at each loop and won't interfere with control loop if it lasts less than 650 microseconds
   static uint32_t calibratedAccTime;
   uint16_t tmp,tmp2;
@@ -733,6 +750,9 @@ void setup() {
   #endif
   calibratingG = 512;
   calibratingB = 200;  // 10 seconds init_delay + 200 * 25 ms = 15 seconds before ground pressure settles
+#if SONAR
+  calibratingS = 200;
+#endif
   #if defined(POWERMETER)
     for(uint8_t j=0; j<=PMOTOR_SUM; j++) pMeter[j]=0;
   #endif
@@ -805,6 +825,9 @@ void go_arm() {
       #ifdef ALTITUDE_RESET_ON_ARM
         #if BARO
           calibratingB = 10; // calibrate baro to new ground level (10 * 25 ms = ~250 ms non blocking)
+        #endif
+        #if SONAR
+          calibratingS = 10;
         #endif
       #endif
       #ifdef LCD_TELEMETRY // reset some values when arming
@@ -953,6 +976,9 @@ void loop () {
           #endif
           #if BARO
             calibratingB=10;  // calibrate baro to new ground level (10 * 25 ms = ~250 ms non blocking)
+          #endif
+          #if SONAR
+            calibratingS = 10;
           #endif
         }
         #if defined(INFLIGHT_ACC_CALIBRATION)
@@ -1104,7 +1130,30 @@ void loop () {
       if (f.ANGLE_MODE || f.HORIZON_MODE) {STABLEPIN_ON;} else {STABLEPIN_OFF;}
     #endif
 
-    #if BARO || SONAR
+    #if SONAR
+      if (rcOptions[BOXSONAR]) {
+        if (f.SONAR_MODE == 0) {
+          f.SONAR_MODE = 1;
+
+          AltHold = alt.EstAlt;
+
+      #if defined(ALT_HOLD_THROTTLE_MIDPOINT)
+          initialThrottleHold = ALT_HOLD_THROTTLE_MIDPOINT;
+      #else
+          initialThrottleHold = rcCommand[THROTTLE];
+      #endif
+
+          errorAltitudeI = 0;
+          BaroPID = 0;
+          f.THROTTLE_IGNORED = 0;
+        }
+      }
+      else {
+          f.SONAR_MODE = 0;
+      }
+    #endif
+
+    #if BARO
       #if (!defined(SUPPRESS_BARO_ALTHOLD))
         #if GPS
         if (GPS_conf.takeover_baro) rcOptions[BOXBARO] = (rcOptions[BOXBARO] || f.GPS_BARO_MODE);
@@ -1263,8 +1312,14 @@ void loop () {
       NAV_error = NAV_ERROR_DISARMED;
       GPS_reset_nav();
     }
-
     #endif //GPS
+
+    // alexmos: using GPSHold checkbox for opticalFlow mode, because no special box in GUI
+    #if defined(OPTFLOW)
+      if (rcOptions[BOXOPTFLOW]) {optflowMode = 1;}
+      else optflowMode = 0;
+    #endif
+
 
     #if defined(FIXEDWING) || defined(HELICOPTER)
       if (rcOptions[BOXPASSTHRU]) {f.PASSTHRU_MODE = 1;}
@@ -1344,10 +1399,15 @@ void loop () {
         #endif
       case 2:
         taskOrder++;
+        #if SONAR
+          Sonar_update(); //debug[2] = sonarAlt;
+        #endif
+      case 3:
+        taskOrder++;
         #if BARO || SONAR
           if (getEstimatedAltitude() != 0) break; // 280 us
         #endif
-      case 3:
+      case 4:
         taskOrder++;
         #if GPS
           if (GPS_Compute() != 0) break;  // performs computation on new frame only if present
@@ -1355,11 +1415,13 @@ void loop () {
           if (GPS_NewData() != 0) break;  // 160 us with no new data / much more with new data
           #endif
         #endif
-      case 4:
-        taskOrder=0;
-        #if SONAR
-          Sonar_update(); //debug[2] = sonarAlt;
+      case 5:
+        taskOrder++; 
+        #ifdef OPTFLOW
+       	  Optflow_update();
         #endif
+      case 6:
+        taskOrder=0;
         #ifdef LANDING_LIGHTS_DDR
           auto_switch_landing_lights();
         #endif
@@ -1441,7 +1503,7 @@ void loop () {
     if (f.SMALL_ANGLES_25 || (f.GPS_mode != 0)) rcCommand[YAW] -= dif*conf.pid[PIDMAG].P8 >> 5;  //Always correct maghold in GPS mode
   } else magHold = att.heading;
 
-  #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
+  #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
   /* Smooth alt change routine , for slow auto and aerophoto modes (in general solution from alexmos). It's slowly increase/decrease
   * altitude proportional to stick movement (+/-100 throttle gives about +/-50 cm in 1 second with cycle time about 3-4ms)
   */
@@ -1523,6 +1585,11 @@ void loop () {
     if (f.ANGLE_MODE || f.HORIZON_MODE) { // axis relying on ACC
       // 50 degrees max inclination
       errorAngle         = constrain(rc + GPS_angle[axis],-500,+500) - att.angle[axis] + conf.angleTrim[axis]; //16 bits is ok here
+      #ifdef OPTFLOW
+        if (f.OPTFLOW_MODE)
+          errorAngle-= optflow_angle[axis];
+      #endif
+
       errorAngleI[axis]  = constrain(errorAngleI[axis]+errorAngle,-10000,+10000);                                                // WindUp     //16 bits is ok here
 
       PTermACC           = mul(errorAngle,conf.pid[PIDLEVEL].P8)>>7; // 32 bits is needed for calculation: errorAngle*P8 could exceed 32768   16 bits is ok for result

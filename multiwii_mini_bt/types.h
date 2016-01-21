@@ -36,7 +36,7 @@ enum box {
     BOXANGLE,
     BOXHORIZON,
   #endif
-  #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
+  #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
     BOXBARO,
   #endif
   #ifdef VARIOMETER
@@ -91,6 +91,12 @@ enum box {
     BOXSYMASHOT,
     BOXSYMACAM,
   #endif
+  #if SONAR
+    BOXSONAR,
+  #endif
+  #if OPTFLOW
+    BOXOPTFLOW,
+  #endif
   CHECKBOXITEMS
 };
 
@@ -143,7 +149,7 @@ typedef struct {
   uint8_t VARIO_MODE :1;
 #endif
   uint8_t GPS_mode: 2;               // 0-3 NONE,HOLD, HOME, NAV (see GPS_MODE_* defines
-#if BARO || GPS
+#if BARO || GPS || SONAR
   uint8_t THROTTLE_IGNORED : 1;      // If it is 1 then ignore throttle stick movements in baro mode;
 #endif
 #if GPS
@@ -157,6 +163,12 @@ typedef struct {
 #ifdef CAM_SYMA_PIN
   uint8_t SYMA_SHOT :1;
   uint8_t SYMA_CAM  :1;
+#endif
+#if SONAR
+  uint8_t SONAR_MODE : 1;
+#endif
+#if OPTFLOW
+  uint8_t OPTFLOW_MODE : 1;
 #endif
 } flags_struct_t;
 

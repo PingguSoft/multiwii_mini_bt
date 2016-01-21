@@ -21,6 +21,9 @@ extern uint16_t cycleTime;
 extern uint16_t calibratingA;
 extern uint16_t calibratingB;
 extern uint16_t calibratingG;
+#if SONAR
+extern uint16_t calibratingS;
+#endif
 extern int16_t  magHold,headFreeModeHold;
 extern uint8_t  vbatMin;
 extern uint8_t  rcOptions[CHECKBOXITEMS];
@@ -41,7 +44,6 @@ extern att_t att;
 extern plog_t plog;
 #endif
 
-extern int32_t  BaroHome;
 #if SERIAL_USER_BUTTON
   extern uint8_t  byteUserButton;
 #endif

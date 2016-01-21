@@ -408,7 +408,7 @@ void evaluateCommand(uint8_t c) {
         if(f.ANGLE_MODE)   tmp |= 1<<BOXANGLE;
         if(f.HORIZON_MODE) tmp |= 1<<BOXHORIZON;
       #endif
-      #if (BARO || SONAR) && (!defined(SUPPRESS_BARO_ALTHOLD))
+      #if BARO && (!defined(SUPPRESS_BARO_ALTHOLD))
         if(f.BARO_MODE) tmp |= 1<<BOXBARO;
       #endif
      #if MAG
@@ -470,6 +470,13 @@ void evaluateCommand(uint8_t c) {
        if(rcOptions[BOXSYMASHOT]) tmp |= 1<<BOXSYMASHOT;
        if(rcOptions[BOXSYMACAM])  tmp |= 1<<BOXSYMACAM;
      #endif
+     #if SONAR
+       if (f.SONAR_MODE) tmp |= 1 << BOXSONAR;
+     #endif
+     #if OPTFLOW
+       if (f.OPTFLOW_MODE) tmp |= 1 << BOXOPTFLOW;
+     #endif
+     
       if(f.ARMED) tmp |= 1<<BOXARM;
       st.flag             = tmp;
       st.set              = global_conf.currentSet;
