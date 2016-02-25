@@ -4,6 +4,50 @@
 /**************************************************************************************/
 /***************             test configurations                   ********************/
 /**************************************************************************************/
+#if defined(INTERBOARD_EDRONE_V2)
+  #define QUADX
+
+  #define I2C_SPEED 400000L
+  #define MPU6050       //combo + ACC
+  #define HMC5883       // magnetor
+  #define HEADFREE
+  #define BMP085        // barometer
+  #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
+  #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  X; imu.gyroADC[PITCH] =  Y; imu.gyroADC[YAW] = -Z;}
+  #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -Y; imu.magADC[PITCH]  = X; imu.magADC[YAW]  = -Z;}
+    /* for V BAT monitoring
+       after the resistor divisor we should get [0V;5V]->[0;1023] on analog V_BATPIN
+       with R1=33k and R2=51k
+       vbat = [0;1023]*16/VBATSCALE
+       must be associated with #define BUZZER ! */
+  #define VOLTAGEDROP_COMPENSATION
+  #define VBAT
+  #define VBATSCALE         10  // (*) change this value if readed Battery voltage is different than real voltage
+  #define VBATNOMINAL       126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
+  #define VBATLEVEL_WARN1   105 // (*) 10,5V
+  #define VBATLEVEL_WARN2   100 // (*) 10.0V
+  #define VBATLEVEL_CRIT    84  // (*) 8.4V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
+  #define NO_VBAT           10  // (*) Avoid beeping without any battery
+  #define VBAT_OFFSET       3   // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
+
+  #define EXT_MOTOR_RANGE
+  #define MOTOR_STOP
+//  #define DEADBAND 24
+
+  #undef  SERIAL0_COM_SPEED
+  #define SERIAL0_COM_SPEED 57600
+
+  #define FAILSAFE
+  #define FAILSAFE_DELAY     10                     // Guard time for failsafe activation after signal lost. 1 step = 0.1sec - 1sec in example
+  #define FAILSAFE_OFF_DELAY 100                    // Time for Landing before motors stop in 0.1sec. 1 step = 0.1sec - 10sec in example
+  #define FAILSAFE_THROTTLE  1300                   // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
+  #define MINTHROTTLE 1050
+  #define MAXTHROTTLE 2000
+
+  #define SERIAL_RECEIVER_ONLY  1
+  #define SERIAL_USER_BUTTON    1
+#endif
+
 #if defined(INTERBOARD_PICO_MULTIWII)
   #define QUADX
 //  #define HEX6X
@@ -11,7 +55,7 @@
   #define I2C_SPEED 400000L
   #define MPU6050       //combo + ACC
 //  #define HMC5883     // magnetor
-  #define HEADFREE
+//  #define HEADFREE
 //  #define BMP085      // barometer
   #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
   #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  X; imu.gyroADC[PITCH] =  Y; imu.gyroADC[YAW] = -Z;}
@@ -49,6 +93,8 @@
 
   #define SERIAL_RECEIVER_ONLY  1
   #define SERIAL_USER_BUTTON    1
+
+/*
 //  #define REVERSE_LED           1
 //  #define CAM_SYMA_PIN          12
 
@@ -58,7 +104,7 @@
   #define CAM_SYMA_PIN_LOW      PORTB &= ~(1<<4);
 #endif
 
-#if 1
+#if 0
 // HC-SR04
 #define SONAR_GENERIC_ECHOPULSE   1
 #define SONAR_GENERIC_TRIGGER_PIN 12
@@ -66,6 +112,7 @@
 
 #define OPTFLOW 3080
 #endif
+*/
 
 #endif
 
@@ -2097,11 +2144,11 @@ default pulse is PH6/12, echo is PB4/11
 /************************* Sonar alt hold / precision / ground collision keeper *******/
   #define SONAR_MAX_HOLD                400     // cm, kind of error delimiter, for now to avoid rocket climbing, only usefull if no baro
 
-//if using baro + sonar       
+//if using baro + sonar
   #define SONAR_BARO_FUSION_LC          100     // cm, baro/sonar readings fusion, low cut, below = full sonar
   #define SONAR_BARO_FUSION_HC          SONAR_MAX_HOLD // cm, baro/sonar readings fusion, high cut, above = full baro
   #define SONAR_BARO_FUSION_RATIO       0.0     // 0.0-1.0,  baro/sonar readings fusion, amount of each sensor value, 0 = proportionnel between LC and HC
-  #define SONAR_BARO_LPF_LC             0.9f 
+  #define SONAR_BARO_LPF_LC             0.9f
   #define SONAR_BARO_LPF_HC             0.9f
 
   #define SONAR_GEP_TriggerPin             SONAR_GENERIC_TRIGGER_PIN
@@ -2123,7 +2170,7 @@ default pulse is PH6/12, echo is PB4/11
 /* Activated by 'GPSHOLD' checkbox (LEVEL mode must be enabled)
 	VEL(P, I) in GUI are used to PID tuning.
 
-Sensors currently supported: 
+Sensors currently supported:
 	ADNS-5050
 		connect and define pins: OF_SCLK, OF_SDIO, OF_NCS
 
@@ -2148,10 +2195,10 @@ Due to software SPI,  you can use any of free Arduino pins
 #define OF_NCS  8
 //#define OF_RESET ??
 
-#define OPTFLOW_I_GAIN 10 // Dont know if this right ? in Gui the Value is 0.010 , but with #define OPTFLOW_I_GAIN 0.100 i get a error :( 
+#define OPTFLOW_I_GAIN 10 // Dont know if this right ? in Gui the Value is 0.010 , but with #define OPTFLOW_I_GAIN 0.100 i get a error :(
 #define OPTFLOW_P_GAIN 50 // Dont know if this right ? in Gui the Value is 50
 
-/* Lense focal distance, mm (set it for your own lense) 
+/* Lense focal distance, mm (set it for your own lense)
  (How to check: debug4 in GUI should not react on ROLL tilt, but react on ROLL slide) */
 #define OF_FOCAL_DIST 9
 /* Deadband for ROLL,PITCH sticks where position hold is enabled. Max value 100 */

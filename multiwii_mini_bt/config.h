@@ -159,7 +159,8 @@
       //#define MultiWii_32U4_SE_no_baro // Hextronik MultiWii_32U4_SE without the MS561101BA to free flash-memory for other functions
       //#define Flyduino9DOF       // Flyduino 9DOF IMU MPU6050+HMC5883l
       //#define Nano_Plane         // Multiwii Plane version with tail-front LSM330 sensor http://www.radiosait.ru/en/page_5324.html
-      #define INTERBOARD_PICO_MULTIWII
+      //#define INTERBOARD_PICO_MULTIWII
+      #define INTERBOARD_EDRONE_V2
 
     /***************************    independent sensors    ********************************/
       /* leave it commented if you already checked a specific board above */
@@ -781,7 +782,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
 
     /*****************************   The type of LCD     **********************************/
       /* choice of LCD attached for configuration and telemetry, see notes below */
-      //#define LCD_DUMMY       // No Physical LCD attached.  With this & LCD_CONF defined, TX sticks still work to set gains, by watching LED blink.  
+      //#define LCD_DUMMY       // No Physical LCD attached.  With this & LCD_CONF defined, TX sticks still work to set gains, by watching LED blink.
       //#define LCD_SERIAL3W    // Alex' initial variant with 3 wires, using rx-pin for transmission @9600 baud fixed
       //#define LCD_TEXTSTAR    // SERIAL LCD: Cat's Whisker LCD_TEXTSTAR Module CW-LCD-02 (Which has 4 input keys for selecting menus)
       //#define LCD_VT100       // SERIAL LCD: vt100 compatible terminal emulation (blueterm, putty, etc.)
