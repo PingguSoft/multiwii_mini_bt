@@ -25,6 +25,7 @@ March  2015     V2.4
 #include "Serial.h"
 #include "GPS.h"
 #include "Protocol.h"
+#include "Telemetry.h"
 #include "OpticalFlow.h"
 
 #include <avr/pgmspace.h>
@@ -57,7 +58,7 @@ const char boxnames[] PROGMEM = // names for dynamic generation of config GUI
     "VARIO;"
   #endif
   #if MAG
-  "MAG;"
+    "MAG;"
     #if defined(HEADFREE)
       "HEADFREE;"
       "HEADADJ;"
@@ -240,7 +241,7 @@ flags_struct_t f;
     uint16_t wattsMax = 0;
   #endif
 #endif
-#if defined(LOG_VALUES) || defined(LCD_TELEMETRY) || defined(ARMEDTIMEWARNING) || defined(LOG_PERMANENT)
+#if defined(LOG_VALUES) || defined(LCD_TELEMETRY) || defined(ARMEDTIMEWARNING) || defined(LOG_PERMANENT) || defined (TELEMETRY)
   uint32_t armedTime = 0;
 #endif
 
@@ -635,6 +636,10 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
     }
   #endif
 
+  #ifdef TELEMETRY
+     run_telemetry();
+  #endif
+
   #if GPS & defined(GPS_LED_INDICATOR)       // modified by MIS to use STABLEPIN LED for number of sattelites indication
     static uint32_t GPSLEDTime;              // - No GPS FIX -> LED blink at speed of incoming GPS frames
     static uint8_t blcnt;                    // - Fix and sat no. bellow 5 -> LED off
@@ -655,7 +660,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
     if (cycleTime < cycleTimeMin) cycleTimeMin = cycleTime; // remember lowscore
   #endif
   if (f.ARMED)  {
-    #if defined(LCD_TELEMETRY) || defined(ARMEDTIMEWARNING) || defined(LOG_PERMANENT)
+    #if defined(LCD_TELEMETRY) || defined(ARMEDTIMEWARNING) || defined(LOG_PERMANENT) || defined (TELEMETRY)
       armedTime += (uint32_t)cycleTime;
     #endif
     #if defined(VBAT)
@@ -772,6 +777,9 @@ void setup() {
   #endif
   #ifdef LCD_CONF_DEBUG
     configurationLoop();
+  #endif
+  #ifdef TELEMETRY
+    init_telemetry();
   #endif
   #ifdef LANDING_LIGHTS_DDR
     init_landing_lights();
@@ -1312,6 +1320,7 @@ void loop () {
       NAV_error = NAV_ERROR_DISARMED;
       GPS_reset_nav();
     }
+
     #endif //GPS
 
     // alexmos: using GPSHold checkbox for opticalFlow mode, because no special box in GUI
@@ -1399,21 +1408,21 @@ void loop () {
         #endif
       case 2:
         taskOrder++;
-        #if SONAR
-          Sonar_update(); //debug[2] = sonarAlt;
-        #endif
-      case 3:
-        taskOrder++;
         #if BARO || SONAR
           if (getEstimatedAltitude() != 0) break; // 280 us
-        #endif
-      case 4:
+        #endif    
+      case 3:
         taskOrder++;
         #if GPS
           if (GPS_Compute() != 0) break;  // performs computation on new frame only if present
           #if defined(I2C_GPS)
           if (GPS_NewData() != 0) break;  // 160 us with no new data / much more with new data
           #endif
+        #endif
+      case 4:
+        taskOrder++;
+        #if BARO || SONAR
+          Sonar_update(); //debug[2] = sonarAlt;
         #endif
       case 5:
         taskOrder++; 

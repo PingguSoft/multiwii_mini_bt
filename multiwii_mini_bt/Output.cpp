@@ -19,7 +19,6 @@ void initializeServo();
 #if defined(PROMINI)
   uint8_t PWM_PIN[8] = {9,10,11,3,6,5,A2,12};   //for a quad+: rear,right,left,front
 #endif
-
 #if defined(PROMICRO)
   #if !defined(HWPWM6)
     #if defined(TEENSY20)
