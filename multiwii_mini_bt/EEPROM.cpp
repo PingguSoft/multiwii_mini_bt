@@ -171,7 +171,7 @@ void LoadDefaults() {
 
     conf.pid[PIDVEL].P8 = 0;      conf.pid[PIDVEL].I8 = 0;    conf.pid[PIDVEL].D8 = 0;
 
-#if defined(INTERBOARD_PICO_MULTIWII)
+#if defined(INTERBOARD_PICO_MULTIWII) || defined(INTERBOARD_EDRONE_V2)
     conf.rcRate8 = 90; conf.rcExpo8 = 30;
 #else
     conf.rcRate8 = 90; conf.rcExpo8 = 65;

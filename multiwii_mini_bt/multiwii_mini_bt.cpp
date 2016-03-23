@@ -1421,13 +1421,15 @@ void loop () {
         #endif
       case 4:
         taskOrder++;
-        #if BARO || SONAR
+        #if SONAR
           Sonar_update(); //debug[2] = sonarAlt;
+          break;
         #endif
       case 5:
         taskOrder++; 
         #ifdef OPTFLOW
        	  Optflow_update();
+          break;
         #endif
       case 6:
         taskOrder=0;

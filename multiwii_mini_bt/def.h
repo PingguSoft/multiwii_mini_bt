@@ -30,7 +30,8 @@
   #define NO_VBAT           10  // (*) Avoid beeping without any battery
   #define VBAT_OFFSET       3   // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
-  #define EXT_MOTOR_1KHZ    //EXT_MOTOR_RANGE
+  #define GYRO_LPF_188HZ
+  #define EXT_MOTOR_32KHZ    //EXT_MOTOR_RANGE
   #define MOTOR_STOP
 //  #define DEADBAND 24
 
@@ -40,15 +41,14 @@
   #define FAILSAFE
   #define FAILSAFE_DELAY     10                     // Guard time for failsafe activation after signal lost. 1 step = 0.1sec - 1sec in example
   #define FAILSAFE_OFF_DELAY 100                    // Time for Landing before motors stop in 0.1sec. 1 step = 0.1sec - 10sec in example
-  #define FAILSAFE_THROTTLE  1300                   // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
+  #define FAILSAFE_THROTTLE  1000                   // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
   #define MINTHROTTLE 1050
   #define MAXTHROTTLE 2000
 
   #define SERIAL_RECEIVER_ONLY  1
   #define SERIAL_USER_BUTTON    1
-#endif
 
-#if defined(INTERBOARD_PICO_MULTIWII)
+#elif defined(INTERBOARD_PICO_MULTIWII)
   #define QUADX
 //  #define HEX6X
 
