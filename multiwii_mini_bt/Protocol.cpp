@@ -50,6 +50,7 @@
 
 #define MSP_CELLS                130   //out message         FRSKY Battery Cell Voltages
 
+#define MSP_SET_RAW_TINY_RC      150   //in message          8 rc chan
 #define MSP_SET_RAW_RC           200   //in message          8 rc chan
 #define MSP_SET_RAW_GPS          201   //in message          fix, numsat, lat, lon, alt, speed
 #define MSP_SET_PID              202   //in message          P I D coeff (9 are used currently)
@@ -264,6 +265,7 @@ void serialCom() {
 
 void evaluateCommand(uint8_t c) {
   uint32_t tmp=0;
+  uint8_t  aux=0;
 
   switch(c) {
     // adding this message as a comment will return an error status for MSP_PRIVATE (end of switch), allowing third party tools to distinguish the implementation of this message
@@ -277,6 +279,18 @@ void evaluateCommand(uint8_t c) {
         headSerialReply(0);
         break;
 #endif
+
+    case MSP_SET_RAW_TINY_RC:
+      for (int i = 0; i < 4; i++)
+          rcSerial[i] = 1000 + (read8() * 4);
+
+      aux = read8();
+      for (int i = 0; i < 4; i++) {
+          rcSerial[4 + i] = (aux & 0x01) ? 2000 : 1000;
+          aux >>= 1;
+      }
+      rcSerialCount = 50; // 1s transition
+      break;
 
     case MSP_SET_RAW_RC:
       s_struct_w((uint8_t*)&rcSerial,16);
@@ -476,7 +490,7 @@ void evaluateCommand(uint8_t c) {
      #if OPTFLOW
        if (f.OPTFLOW_MODE) tmp |= 1 << BOXOPTFLOW;
      #endif
-     
+
       if(f.ARMED) tmp |= 1<<BOXARM;
       st.flag             = tmp;
       st.set              = global_conf.currentSet;

@@ -48,7 +48,7 @@
   #define SERIAL_RECEIVER_ONLY  1
   #define SERIAL_USER_BUTTON    1
 
-#elif defined(INTERBOARD_PICO_MULTIWII)
+#elif defined(INTERBOARD_PICO_MULTIWII) || defined(INTERBOARD_EDRONE_ECO)
   #define QUADX
 //  #define HEX6X
 
@@ -57,9 +57,16 @@
 //  #define HMC5883     // magnetor
 //  #define HEADFREE
 //  #define BMP085      // barometer
+
+#if defined(INTERBOARD_PICO_MULTIWII)
   #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  Y; imu.accADC[PITCH]  = -X; imu.accADC[YAW]  = Z;}
   #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  X; imu.gyroADC[PITCH] =  Y; imu.gyroADC[YAW] = -Z;}
   #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -X; imu.magADC[PITCH]  = -Y; imu.magADC[YAW]  = -Z;}
+#elif defined(INTERBOARD_EDRONE_ECO)
+  #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  -X; imu.accADC[PITCH]  = -Y; imu.accADC[YAW]  = Z;}
+  #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  Y; imu.gyroADC[PITCH] =  -X; imu.gyroADC[YAW] = -Z;}
+#endif
+
 //  #define BUZZER
 
     /* for V BAT monitoring
@@ -77,7 +84,8 @@
   #define NO_VBAT           10  // (*) Avoid beeping without any battery
   #define VBAT_OFFSET       3   // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
-  #define EXT_MOTOR_RANGE
+//  #define EXT_MOTOR_RANGE
+  #define EXT_MOTOR_32KHZ
   #define MOTOR_STOP
 //  #define DEADBAND 24
 
@@ -1184,7 +1192,7 @@
   #define GPS_SERIAL 2
   #define VENUS8
   #define USE_MSP_WP
-  
+
   #define LED1PIN_ON   PORTB |= (1<<7);
   #define LED1PIN_OFF  PORTB &= ~(1<<7);
   #define LED2PIN_ON   PORTC |= (1<<7);

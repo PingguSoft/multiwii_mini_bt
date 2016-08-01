@@ -161,7 +161,8 @@
       //#define Flyduino9DOF       // Flyduino 9DOF IMU MPU6050+HMC5883l
       //#define Nano_Plane         // Multiwii Plane version with tail-front LSM330 sensor http://www.radiosait.ru/en/page_5324.html
       //#define INTERBOARD_PICO_MULTIWII
-      #define INTERBOARD_EDRONE_V2
+      //#define INTERBOARD_EDRONE_V2
+      #define INTERBOARD_EDRONE_ECO
 
     /***************************    independent sensors    ********************************/
       /* leave it commented if you already checked a specific board above */
@@ -883,7 +884,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
   /****                             TELEMETRY                      ****/
   /********************************************************************/
     // select one of the two protocols depending on your receiver
-    //#define FRSKY_TELEMETRY           // used for FRSKY twoway receivers with telemetry (D-series like D8R-II or D8R-XP) 
+    //#define FRSKY_TELEMETRY           // used for FRSKY twoway receivers with telemetry (D-series like D8R-II or D8R-XP)
                                       // VBAT, Baro, MAG, GPS and POWERMETER are helpful
                                       // VBAT_CELLS is optional for a forth screen on the display FLD-02
     //#define SPORT_TELEMETRY           // for FRSKY twoway receivers with S.PORT telemetry (S-series like X4R/X6R/X8R), not implemented yet - TO BE DONE
@@ -896,7 +897,7 @@ Also note, that maqgnetic declination changes with time, so recheck your value e
     //#define OPENTX                    // send OpenTX specific data
 
     // FRSKY standard telemetry specific selections
-    //#define COORDFORMAT_DECIMALMINUTES // uncomment to get the format DD°MM.mmmm for the coordinates - comment out to get the format DD.dddddd° for the coordinates 
+    //#define COORDFORMAT_DECIMALMINUTES // uncomment to get the format DD°MM.mmmm for the coordinates - comment out to get the format DD.dddddd° for the coordinates
     //#define KILOMETER_HOUR            // send speed in kilometers per hour instead of knots (default) - requested by OPENTX
     #define TELEMETRY_ALT_BARO        // send BARO based altitude, calibrated to 0 when arming, recommended if BARO available
     //#define TELEMETRY_ALT_GPS         // send GPS based altitude (altitude above see level), for FLD-02 don't use together with TELEMETRY_ALT_BARO
