@@ -162,7 +162,8 @@
       //#define Nano_Plane         // Multiwii Plane version with tail-front LSM330 sensor http://www.radiosait.ru/en/page_5324.html
       //#define INTERBOARD_PICO_MULTIWII
       //#define INTERBOARD_EDRONE_V2
-      #define INTERBOARD_EDRONE_ECO
+      //#define INTERBOARD_EDRONE_ECO
+      #define INTERBOARD_EDRONE_V3
 
     /***************************    independent sensors    ********************************/
       /* leave it commented if you already checked a specific board above */

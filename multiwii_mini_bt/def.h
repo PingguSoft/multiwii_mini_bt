@@ -4,7 +4,49 @@
 /**************************************************************************************/
 /***************             test configurations                   ********************/
 /**************************************************************************************/
-#if defined(INTERBOARD_EDRONE_V2)
+#if defined(INTERBOARD_EDRONE_V3)
+  #define QUADX
+  #define SERIAL_SUM_PPM         ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Multiplex
+  #define I2C_SPEED 400000L
+  #define MPU6050       //combo + ACC
+  #define HMC5883       // magnetor
+  #define HEADFREE
+  #define BMP085        // barometer
+  #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  -X; imu.accADC[PITCH]  = -Y; imu.accADC[YAW]  = Z;}
+  #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  Y; imu.gyroADC[PITCH] =  -X; imu.gyroADC[YAW] = -Z;}
+  #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -Y; imu.magADC[PITCH]  = X; imu.magADC[YAW]  = -Z;}
+    /* for V BAT monitoring
+       after the resistor divisor we should get [0V;5V]->[0;1023] on analog V_BATPIN
+       with R1=33k and R2=51k
+       vbat = [0;1023]*16/VBATSCALE
+       must be associated with #define BUZZER ! */
+  #define VOLTAGEDROP_COMPENSATION
+  #define VBAT
+  #define VBATSCALE         10  // (*) change this value if readed Battery voltage is different than real voltage
+  #define VBATNOMINAL       126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
+  #define VBATLEVEL_WARN1   105 // (*) 10,5V
+  #define VBATLEVEL_WARN2   100 // (*) 10.0V
+  #define VBATLEVEL_CRIT    84  // (*) 8.4V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
+  #define NO_VBAT           10  // (*) Avoid beeping without any battery
+  #define VBAT_OFFSET       3   // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
+
+  #define GYRO_LPF_188HZ
+  #define EXT_MOTOR_32KHZ    //EXT_MOTOR_RANGE
+  #define MOTOR_STOP
+//  #define DEADBAND 24
+
+  #undef  SERIAL0_COM_SPEED
+  #define SERIAL0_COM_SPEED 57600
+
+  #define FAILSAFE
+  #define FAILSAFE_DELAY     10                     // Guard time for failsafe activation after signal lost. 1 step = 0.1sec - 1sec in example
+  #define FAILSAFE_OFF_DELAY 100                    // Time for Landing before motors stop in 0.1sec. 1 step = 0.1sec - 10sec in example
+  #define FAILSAFE_THROTTLE  1000                   // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
+  #define MINTHROTTLE 1050
+  #define MAXTHROTTLE 2000
+
+  #define SERIAL_USER_BUTTON    1
+#elif defined(INTERBOARD_EDRONE_V2)
   #define QUADX
 
   #define I2C_SPEED 400000L
