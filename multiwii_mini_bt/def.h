@@ -6,8 +6,10 @@
 /**************************************************************************************/
 #if defined(INTERBOARD_EDRONE_V3)
   #define QUADX
-  #define SERIAL_SUM_PPM         ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Multiplex
-  #define I2C_SPEED 400000L
+  #define SERIAL_SUM_PPM    ROLL,PITCH,THROTTLE,YAW,AUX1,AUX2,AUX3,AUX4,8,9,10,11 //For Multiplex
+  #define I2C_SPEED         400000L
+
+#if 0
   #define MPU6050       //combo + ACC
   #define HMC5883       // magnetor
   #define HEADFREE
@@ -15,6 +17,10 @@
   #define FORCE_ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  =  -X; imu.accADC[PITCH]  = -Y; imu.accADC[YAW]  = Z;}
   #define FORCE_GYRO_ORIENTATION(X, Y, Z) {imu.gyroADC[ROLL] =  Y; imu.gyroADC[PITCH] =  -X; imu.gyroADC[YAW] = -Z;}
   #define FORCE_MAG_ORIENTATION(X, Y, Z)  {imu.magADC[ROLL]  =  -Y; imu.magADC[PITCH]  = X; imu.magADC[YAW]  = -Z;}
+#endif
+
+  #define GY_88
+
     /* for V BAT monitoring
        after the resistor divisor we should get [0V;5V]->[0;1023] on analog V_BATPIN
        with R1=33k and R2=51k
@@ -30,8 +36,8 @@
   #define NO_VBAT           10  // (*) Avoid beeping without any battery
   #define VBAT_OFFSET       3   // offset in 0.1Volts, gets added to voltage value  - useful for zener diodes
 
-  #define GYRO_LPF_188HZ
-  #define EXT_MOTOR_32KHZ    //EXT_MOTOR_RANGE
+  #define GYRO_LPF_256HZ
+  #define EXT_MOTOR_RANGE
   #define MOTOR_STOP
 //  #define DEADBAND 24
 
