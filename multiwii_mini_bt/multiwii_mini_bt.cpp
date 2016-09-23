@@ -108,10 +108,10 @@ const char boxnames[] PROGMEM = // names for dynamic generation of config GUI
 #endif
 #if SONAR
 "SONAR;"
-#endif 
+#endif
 #if OPTFLOW
 "OPTFLOW;"
-#endif 
+#endif
   ;
 
 const uint8_t boxids[] PROGMEM = {// permanent IDs associated to boxes. This way, you can rely on an ID number to identify a BOX function.
@@ -1335,7 +1335,7 @@ void loop () {
       else {f.PASSTHRU_MODE = 0;}
     #endif
 
-    #if 0 //defined(CAM_SYMA_PIN)
+    #if defined(CAM_SYMA_PIN)
       if (syma_f.triggerShot == 0 && syma_f.triggerCam == 0) {
         if (f.SYMA_CAM == 0) {
           if (f.SYMA_SHOT == 0 && rcOptions[BOXSYMASHOT]) {
@@ -1363,7 +1363,7 @@ void loop () {
 
     #if SERIAL_USER_BUTTON
       if (byteOldUserButton != byteUserButton) {
-      #if defined(CAM_SYMA_PIN)
+      #if 0 //defined(CAM_SYMA_PIN)
         if (syma_f.triggerShot == 0 && syma_f.triggerCam == 0) {
           if (f.SYMA_CAM == 0) {
             if (f.SYMA_SHOT == 0 && USER_BUTTON_ON(0)) {
@@ -1410,7 +1410,7 @@ void loop () {
         taskOrder++;
         #if BARO || SONAR
           if (getEstimatedAltitude() != 0) break; // 280 us
-        #endif    
+        #endif
       case 3:
         taskOrder++;
         #if GPS
@@ -1426,7 +1426,7 @@ void loop () {
           break;
         #endif
       case 5:
-        taskOrder++; 
+        taskOrder++;
         #ifdef OPTFLOW
        	  Optflow_update();
           break;
